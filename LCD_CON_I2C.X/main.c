@@ -71,19 +71,8 @@ void main(void)
     int valor;
     while (1)
     {
-       /*
-       __delay_ms(3000);
-       lcd_delete();
-       lcd_writemessage(1,1,"Hola Saiooo");
-       __delay_ms(1000);
-       lcd_writemessage(2, 1, "Saludos a Antoo");
-       __delay_ms(1000);
-       lcd_delete();
-       lcd_writemessage(2, 1, "Love u bothhh");
-       */
-      char buffer[17]; // Asumiendo LCD de 16 caracteres por línea
-
-      //lcd_writemessage(1, 1, buffer);  // Lo manda al display
+ 
+      char buffer[17];
 
       __delay_ms(50);
       lcd_delete();

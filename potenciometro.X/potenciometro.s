@@ -9,10 +9,10 @@ LIST
 
 ; CONFIG1
   CONFIG  FEXTOSC = OFF         ; External Oscillator mode selection bits (EC above 8MHz; PFM set to high power)
-  CONFIG  RSTOSC = HFINT1        ; Power-up default value for COSC bits (LFINTOSC)
+  CONFIG  RSTOSC = HFINT1       ; Power-up default value for COSC bits (LFINTOSC)
   CONFIG  CLKOUTEN = OFF        ; Clock Out Enable bit (CLKOUT function is disabled; i/o or oscillator function on OSC2)
   CONFIG  CSWEN = ON            ; Clock Switch Enable bit (Writing to NOSC and NDIV is allowed)
-  CONFIG  FCMEN = OFF            ; Fail-Safe Clock Monitor Enable bit (FSCM timer enabled)
+  CONFIG  FCMEN = OFF           ; Fail-Safe Clock Monitor Enable bit (FSCM timer enabled)
 
 ; CONFIG2
   CONFIG  MCLRE = ON            ; Master Clear Enable bit (MCLR pin is Master Clear function)
@@ -26,7 +26,7 @@ LIST
 
 ; CONFIG3
   CONFIG  WDTCPS = WDTCPS_31    ; WDT Period Select bits (Divider ratio 1:65536; software control of WDTPS)
-  CONFIG  WDTE = OFF             ; WDT operating mode (WDT enabled regardless of sleep; SWDTEN ignored)
+  CONFIG  WDTE = OFF            ; WDT operating mode (WDT enabled regardless of sleep; SWDTEN ignored)
   CONFIG  WDTCWS = WDTCWS_7     ; WDT Window Select bits (window always open (100%); software control; keyed access not required)
   CONFIG  WDTCCS = SC           ; WDT input clock selector (Software Control)
 
@@ -49,6 +49,11 @@ LIST
   MOVLW 0b10000000     ; Referencia VDD y VSS, Justificado a la izquierda
   MOVWF ADCON1
 
+; CONFIG LEDS
+MOVLW   0b00001111   ; RA4 a 7 como salidas, el resto como estaban
+ANDWF   TRISA, F
+
+
 // config statements should precede project file includes.
 
 ///////////////////////////////////////////////////////////////     
@@ -60,18 +65,11 @@ PSECT code
 
 main:
 
-  ;Los 4 leds como salida
-  BSF	    PORTA, 4
-  BSF	    PORTA, 5
-  BSF	    PORTA, 6
-  BSF	    PORTA, 7
-
-
 START:
 
-;GOTO adc
-;  MOVLW  0b01010101
-;  MOVWF  0x20        
+GOTO adc
+  MOVLW  0b01010101
+  MOVWF  0x20        
 
   ;alterno 0x20 entre unos  y ceros
   BTFSC 0x20, 7
@@ -110,37 +108,41 @@ adc:
     
 ;los bits de los leds son 4, 5, 6 y 7 del puerto A
 nivel0: ;0000
-    BCF  LATA, 7
-    BCF  LATA, 6
-    BCF  LATA, 5
-    BCF  LATA, 4
+  MOVF  LATA, W
+  ANDLW 0b00001111
+  MOVWF LATA
+
+  GOTO  START
 
 nivel1: ;0001
-    BCF  LATA, 7
-    BCF  LATA, 6
-    BCF  LATA, 5
-    BSF  LATA, 4
-    GOTO START
+  MOVF  LATA, 0
+  ANDLW 0b00011111
+  IORLW 0b00010000
+  MOVWF LATA
+
+  GOTO  START
 
 nivel2: ;0011
-    BCF  LATA, 7
-    BCF  LATA, 6
-    BSF  LATA, 5
-    BSF  LATA, 4
-    GOTO START
+  MOVF  LATA, 0
+  ANDLW 0b00111111
+  IORLW 0b00110000
+  MOVWF LATA
+
+  GOTO  START
 
 nivel3: ;0111
-    BCF  LATA, 7
-    BSF  LATA, 6
-    BSF  LATA, 5
-    BSF  LATA, 4
-    GOTO START
+  MOVF  LATA, 0
+  ANDLW 0b01111111
+  IORLW 0b01110000
+  MOVWF LATA
+
+  GOTO  START
 
 nivel4: ;1111
-    BSF  LATA, 7
-    BSF  LATA, 6
-    BSF  LATA, 5
-    BSF  LATA, 4
-    GOTO START
+  MOVF  LATA, 0
+  IORLW 0b11110000
+  MOVWF LATA
+
+  GOTO  START
 
 END main
